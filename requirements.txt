@@ -1,0 +1,56 @@
+# FastSpeech 2 TTS - Requirements
+# Python >= 3.8
+
+# Core ML
+torch>=2.0.0
+torchaudio>=2.0.0
+torchvision>=0.15.0
+
+# Audio processing
+librosa>=0.10.0
+soundfile>=0.12.1
+pyworld>=0.3.4
+scipy>=1.10.0
+
+# Text processing / Phonemization
+phonemizer>=3.2.1
+epitran>=1.26
+num2words>=0.5.13
+indic-transliteration>=2.3.57
+inflect>=6.0.0
+
+# Dataset loading
+datasets>=2.14.0
+huggingface_hub>=0.17.0
+
+# MFA (Montreal Forced Aligner) — install separately:
+# conda install -c conda-forge montreal-forced-aligner
+# mfa model download acoustic english_us_arpa
+# mfa model download dictionary english_us_arpa
+
+# TextGrid parsing
+tgt>=1.4.4
+
+# Utilities
+numpy>=1.24.0
+tqdm>=4.65.0
+pyyaml>=6.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+pandas>=2.0.0
+Pillow>=10.0.0
+
+# NLP utilities
+nltk>=3.8.1
+regex>=2023.6.3
+
+# Vocoder (HiFi-GAN) — clone separately:
+# git clone https://github.com/jik876/hifi-gan
+# Download pretrained checkpoint from their repo
+
+# Optional: for mixed precision
+# Already included in torch>=2.0 (torch.cuda.amp)
+
+# Colab specific (auto-installed in Colab, comment out locally)
+# google-colab
+

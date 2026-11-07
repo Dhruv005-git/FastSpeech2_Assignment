@@ -1,0 +1,80 @@
+# ============================================================
+# FastSpeech 2 — English (Svarah) Configuration
+# ============================================================
+
+# --------------- Dataset ---------------
+dataset: "svarah"
+raw_path: "./data/raw/english"
+preprocessed_path: "./data/preprocessed/english"
+val_size: 0.167          # ~1 hr out of ~6 hrs total
+
+# --------------- Audio ---------------
+sampling_rate: 22050
+max_wav_value: 32768.0
+filter_length: 1024
+hop_length: 256
+win_length: 1024
+n_mel_channels: 80
+mel_fmin: 0.0
+mel_fmax: 8000.0
+
+# --------------- Phoneme / Text ---------------
+text_cleaners:
+  - "english_cleaners"
+language: "en"
+
+# --------------- Encoder ---------------
+encoder_hidden: 256
+encoder_head: 2
+encoder_layers: 4
+encoder_dropout: 0.2
+encoder_kernel_size: 9
+
+# --------------- Decoder ---------------
+decoder_hidden: 256
+decoder_head: 2
+decoder_layers: 4
+decoder_dropout: 0.2
+
+# --------------- FFT Block (shared) ---------------
+fft_conv1d_filter_size: 1024
+fft_conv1d_kernel_size: [9, 1]
+
+# --------------- Variance Predictor ---------------
+variance_predictor_filter_size: 256
+variance_predictor_kernel_size: 3
+variance_predictor_dropout: 0.5
+max_seq_len: 1000
+
+# --------------- Variance Adaptor ---------------
+pitch_feature: "phoneme_level"
+energy_feature: "phoneme_level"
+pitch_normalization: true
+energy_normalization: true
+pitch_bins: 256
+energy_bins: 256
+
+# --------------- Training ---------------
+batch_size: 16
+batchsize_per_gpu: 16
+epochs: 200
+save_step: 10000
+log_step: 1000
+val_step: 5000
+optimizer: "adam"
+learning_rate: 0.0001
+warm_up_step: 4000
+anneal_steps: [300000, 400000, 500000]
+anneal_rate: 0.3
+grad_clip_thresh: 1.0
+weight_decay: 0.0
+accumulation_steps: 1
+
+# --------------- Vocoder ---------------
+vocoder: "hifigan"
+vocoder_model_path: "./hifigan/LJ_V2/generator_v2"
+vocoder_config_path: "./hifigan/LJ_V2/config.json"
+
+# --------------- Paths ---------------
+checkpoint_path: "./checkpoints"
+result_path: "../Results/English"

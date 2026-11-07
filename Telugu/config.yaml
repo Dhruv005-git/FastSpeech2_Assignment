@@ -1,0 +1,141 @@
+# ============================================================
+# FastSpeech 2 — Telugu Language Configuration
+# ============================================================
+# Dataset  : IndicTTS Telugu (IIT Madras / ai4bharat HuggingFace)
+# Language : Telugu (te)  |  Script: Telugu Unicode U+0C00–U+0C7F
+# ============================================================
+
+# ----- Dataset & Paths -----
+dataset: "indic_tts_telugu"
+language: "te"
+
+raw_path:           "./data/raw/telugu"
+preprocessed_path:  "./data/preprocessed/telugu"
+result_path:        "../Results/Telugu"
+checkpoint_path:    "./checkpoints/telugu"
+
+# MFA alignment output (TextGrid files)
+alignment_path:     "./data/mfa_output/telugu"
+# Vocabulary file produced by preprocess.py
+vocab_path:         "./data/preprocessed/telugu/vocab.json"
+
+# ----- Text / Phoneme -----
+text_cleaners:  ["telugu_cleaners"]
+# Supported phoneme backends: "epitran" | "character"
+phoneme_backend: "epitran"       # falls back to character-level if epitran unavailable
+epitran_code:    "tel-Telu"      # Epitran language code for Telugu
+
+# ARPAbet / IPA symbol used for silence/padding
+silence_token: "<sil>"
+pad_token:     "<pad>"
+unk_token:     "<unk>"
+
+# ----- Audio -----
+sampling_rate:   22050
+max_wav_value:   32768.0         # for int16 normalisation
+# STFT
+filter_length:   1024
+hop_length:      256
+win_length:      1024
+window:          "hann"
+# Mel filterbank
+n_mel_channels:  80
+mel_fmin:        0.0
+mel_fmax:        8000.0
+# Pitch (F0)
+pitch_fmin:      50.0
+pitch_fmax:      600.0
+# Energy
+energy_min:      null            # computed from data during preprocessing
+energy_max:      null
+
+# ----- Preprocessing -----
+target_hours_train:  5.0
+target_hours_val:    1.0
+val_size:            0.1667      # ~1 hr / (5 + 1) hrs ≈ 16.67 %
+min_duration:        0.5         # seconds — drop clips shorter than this
+max_duration:        15.0        # seconds — drop clips longer than this
+
+# ----- MFA -----
+mfa_acoustic_model:  "telugu_mfa"
+mfa_dictionary:      "telugu_mfa"
+
+# ----- Model Architecture (identical to English) -----
+model:
+  # Encoder
+  encoder_layer:      4
+  encoder_head:       2
+  encoder_hidden:     256
+  encoder_conv1d_filter_size: 1024
+  encoder_conv1d_kernel_size_list: [9, 1]
+  encoder_output_size: 256
+  encoder_dropout:    0.2
+
+  # Variance Adaptor
+  variance_predictor_filter_size: 256
+  variance_predictor_kernel_size: 3
+  variance_predictor_dropout:     0.5
+
+  # Decoder
+  decoder_layer:      4
+  decoder_head:       2
+  decoder_hidden:     256
+  decoder_conv1d_filter_size: 1024
+  decoder_conv1d_kernel_size_list: [9, 1]
+  decoder_output_size: 256
+  decoder_dropout:    0.2
+
+  # Postnet
+  postnet_conv_channels:    512
+  postnet_conv_kernel_size: 5
+  postnet_num_convolutions: 5
+  postnet_dropout:          0.5
+
+  # Output
+  num_mel_channels: 80          # must equal n_mel_channels above
+
+  # Pitch & Energy conditioning
+  pitch_feature_level:  "frame_level"   # "frame_level" | "phoneme_level"
+  energy_feature_level: "frame_level"
+  pitch_quantization:   "linear"        # "linear" | "log"
+  energy_quantization:  "linear"
+  n_bins:               256
+
+# ----- Training -----
+train:
+  batch_size:        16
+  batchsize_per_gpu: 16
+  epochs:            900
+  total_step:        900000       # ~900 k steps like the paper
+  log_step:          100
+  val_step:          1000
+  save_step:         10000
+  synth_step:        1000
+  grad_clip_thresh:  1.0
+  acc_steps:         1            # gradient accumulation steps
+  num_workers:       4
+
+  # Optimizer
+  optimizer: "adam"
+  betas:      [0.9, 0.98]
+  eps:        1.0e-9
+  weight_decay: 0.0
+
+  # Learning-rate schedule (transformer schedule)
+  lr_schedule: "noam"
+  lr_warmup_steps: 4000
+  d_model:          256           # used by noam schedule
+
+  # Loss weights
+  loss:
+    mel_weight:    1.0
+    postnet_weight: 1.0
+    duration_weight: 1.0
+    pitch_weight:  1.0
+    energy_weight: 1.0
+
+# ----- Vocoder (inference) -----
+vocoder:
+  model: "hifigan"
+  config_path:      "../hifigan/config_v1.json"
+  checkpoint_path:  "../hifigan/generator_v1"
