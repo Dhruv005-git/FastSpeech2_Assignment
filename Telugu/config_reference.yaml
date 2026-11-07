@@ -1,0 +1,80 @@
+# ============================ FastSpeech 2 - TELUGU (IndicTTS) ============================
+language: telugu
+
+dataset:
+  name: SPRINGLab/IndicTTS_Telugu     # public
+  hf_token_env: HF_TOKEN
+  text_column: null               # null = auto-detect (printed at start of preprocessing)
+  speaker_column: null            # null = auto (-> gender, 2 voices)
+  train_hours: 5.0                # ~5 h train
+  val_hours: 1.0                  # ~1 h validation (disjoint: unique transcripts, split at utterance level)
+  min_dur: 1.0                    # seconds (raw clip)
+  max_dur: 15.0
+  min_snr_db: 10.0                # dynamic-range quality filter (p90-p10 frame RMS in dB); lower it if too few clips survive
+  seed: 1234
+
+audio:
+  sampling_rate: 22050            # must match the BigVGAN vocoder
+  n_fft: 1024
+  hop_length: 256
+  win_length: 1024
+  n_mels: 80
+  fmin: 0
+  fmax: null                      # null = sr/2 (BigVGAN-v2 22k/80band/256x setting)
+  f0_min: 60
+  f0_max: 600
+  trim_top_db: 35
+
+path:                              # relative to this file
+  preprocessed_path: ./preprocessed
+  checkpoint_path: ./checkpoints
+  results_path: ../Results/Telugu
+
+aligner:                           # replaces MFA: learned alignment (see fastspeech2/aligner.py)
+  epochs: 60
+  batch_size: 24
+  lr: 0.001
+  num_workers: 2
+  retrain: false
+
+model:
+  transformer:
+    encoder_layer: 4
+    encoder_head: 2
+    n_head: 2
+    encoder_hidden: 256
+    decoder_layer: 6
+    decoder_hidden: 256
+    conv_filter_size: 1024
+    conv_kernel_size: [9, 1]
+    dropout: 0.2
+  variance_predictor:
+    filter_size: 256
+    kernel_size: 3
+    dropout: 0.5
+    n_bins: 256
+
+optimizer:
+  betas: [0.9, 0.98]
+  eps: 1.0e-9
+  weight_decay: 0.0
+  grad_clip_thresh: 1.0
+  warm_up_step: 4000
+  anneal_steps: [20000, 26000]
+  anneal_rate: 0.3
+  lr_scale: 1.0
+
+train:
+  seed: 1234
+  batch_size: 32
+  total_step: 30000
+  log_step: 50
+  val_step: 1000
+  save_step: 5000
+  keep_checkpoints: 3
+  amp: true
+  num_workers: 2
+
+inference:
+  vocoder: nvidia/bigvgan_v2_22khz_80band_256x   # "griffin-lim" for a no-download fallback
+  speaker: "0"                                    # gender id of the voice to use ("0" = female in this dataset)
